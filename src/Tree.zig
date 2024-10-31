@@ -113,7 +113,6 @@ pub fn printTree(node: *TreeNode, prefix: []const u8, is_last: bool) !void {
 
     // Print the current node, will always be white
     const icon = node.getIcon();
-    // const icon = if (node.kind == .directory) "📁" else "📄";
     const connector = if (is_last) "└──" else "├──";
     try out.print("{s}{s}{s}", .{ prefix, connector, icon });
 
