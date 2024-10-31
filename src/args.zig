@@ -14,6 +14,8 @@ help: bool = false,
 all: bool = false,
 /// List directories only
 dir: bool = false,
+/// Print the full path prefix for each file.
+full: bool = false,
 /// Descend only level directories deep
 level: usize = 1,
 /// Directories given
@@ -25,6 +27,7 @@ pub fn parse_args(allocator: Allocator) !Args {
         \\-h, --help                Display this help and exit.
         \\-a, --all                 All Files are listed.
         \\-d, --dir                 List directories only.
+        \\-f, --full                Print the full path prefix for each file.
         \\-L, --level <USIZE>       Descend only level directories deep.
         \\<DIR>...
         \\
@@ -69,6 +72,7 @@ pub fn parse_args(allocator: Allocator) !Args {
         .help = res.args.help != 0,
         .all = res.args.all != 0,
         .dir = res.args.dir != 0,
+        .full = res.args.full != 0,
         .level = level,
         .positionals = positionals,
     };

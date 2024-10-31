@@ -58,6 +58,7 @@ pub fn constructTree(self: *Tree) !void {
             try path_components.append(component);
         }
 
+
         // Traverse or create nodes
         var current_node = self.root;
         for (path_components.items[0 .. path_components.items.len - 1]) |component| {
@@ -74,6 +75,15 @@ pub fn constructTree(self: *Tree) !void {
                 try current_node.children.append(new_node);
                 current_node = new_node;
             }
+        }
+
+        // TODO: Implement full paths for each TreeNode
+        if (self.args.full) {
+            // try path_components.append("./");
+            // const new_name = "./" ++ current_node.name;
+            // self.allocator.free(current_node.name);
+            // const new_name = self.allocator.dupe(u8, "./" ++ current_node.name);
+            // std.mem.copyForwards(u8, current_node.name, new_name);
         }
 
         // Add the final component
