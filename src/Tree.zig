@@ -18,6 +18,9 @@ allocator: Allocator,
 args: Args,
 walker: fs.Dir.Walker,
 root: *TreeNode,
+stdout: std.fs.File,
+config: tty.Config,
+out: std.fs.File.Writer,
 
 pub fn init(allocator: Allocator, dir: fs.Dir, base_path: []const u8, args: Args) !Tree {
     return .{
@@ -25,6 +28,9 @@ pub fn init(allocator: Allocator, dir: fs.Dir, base_path: []const u8, args: Args
         .args = args,
         .walker = try dir.walk(allocator),
         .root = try TreeNode.init(allocator, base_path, .directory),
+        .stdout = std.io.getStdOut(),
+        .config = tty.detectConfig(std.io.getStdOut()),
+        .out = std.io.getStdOut().writer(),
     };
 }
 
@@ -99,52 +105,44 @@ pub fn constructTree(self: *Tree) !void {
 }
 
 pub fn printFull(self: *Tree, positional: []const u8) !void {
-    const stdout = std.io.getStdOut();
-    const config = tty.detectConfig(stdout);
-    const out = stdout.writer();
-
     // print the positional
-    try config.setColor(out, .bold);
-    try config.setColor(out, .blue);
-    try out.print("{s}\n", .{positional});
+    try self.config.setColor(self.out, .bold);
+    try self.config.setColor(self.out, .blue);
+    try self.out.print("{s}\n", .{positional});
 
-    try config.setColor(out, .reset);
-    try config.setColor(out, .white);
+    try self.config.setColor(self.out, .reset);
+    try self.config.setColor(self.out, .white);
     // Skip the root node's children and print them directly
     for (self.root.children.items, 0..) |child, i| {
-        try printTree(child, "", i == self.root.children.items.len - 1);
+        try self.printTree(child, "", i == self.root.children.items.len - 1);
     }
 }
 
-pub fn printTree(node: *TreeNode, prefix: []const u8, is_last: bool) !void {
-    const stdout = std.io.getStdOut();
-    const config = tty.detectConfig(stdout);
-    const out = stdout.writer();
-
+pub fn printTree(self: *Tree, node: *TreeNode, prefix: []const u8, is_last: bool) !void {
     // Print the current node, will always be white
     const icon = node.getIcon();
     const connector = if (is_last) "└──" else "├──";
-    try out.print("{s}{s}{s}", .{ prefix, connector, icon });
+    try self.out.print("{s}{s}{s}", .{ prefix, connector, icon });
 
     if (node.kind == .directory) {
-        try config.setColor(out, .bold);
-        try config.setColor(out, .blue);
+        try self.config.setColor(self.out, .bold);
+        try self.config.setColor(self.out, .blue);
     }
     // Sets executables as green
     if (node.kind == .file) {
         if (native_os != .windows and !mem.containsAtLeast(u8, node.name, 1, ".")) {
-            try config.setColor(out, .green);
+            try self.config.setColor(self.out, .green);
         }
 
         if (native_os == .windows and mem.endsWith(u8, node.name, ".exe")) {
-            try config.setColor(out, .green);
+            try self.config.setColor(self.out, .green);
         }
     }
-    try out.print("{s}\n", .{ node.name });
+    try self.out.print("{s}\n", .{ node.name });
 
     // Reset color always
-    try config.setColor(out, .reset);
-    try config.setColor(out, .white);
+    try self.config.setColor(self.out, .reset);
+    try self.config.setColor(self.out, .white);
 
     // Prepare prefix for children
     var new_prefix = std.ArrayList(u8).init(node.allocator);
@@ -154,6 +152,6 @@ pub fn printTree(node: *TreeNode, prefix: []const u8, is_last: bool) !void {
 
     // Print children
     for (node.children.items, 0..) |child, i| {
-        try printTree(child, new_prefix.items, i == node.children.items.len - 1);
+        try self.printTree(child, new_prefix.items, i == node.children.items.len - 1);
     }
 }
