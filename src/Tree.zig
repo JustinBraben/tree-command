@@ -37,7 +37,9 @@ pub fn constructTree(self: *Tree) !void {
         if (mem.eql(u8, entry.path, "")) continue;
 
         // Based on args, skip certain files/directories
-        if (mem.startsWith(u8, entry.path, ".")) continue;
+        if (!self.args.all) {
+            if (mem.startsWith(u8, entry.path, ".")) continue;
+        }
 
         // Split the path into components
         var path_components = std.ArrayList([]const u8).init(self.allocator);
@@ -108,6 +110,16 @@ pub fn printTree(node: *TreeNode, prefix: []const u8, is_last: bool) !void {
     try out.print("{s}{s}{s}", .{ prefix, connector, icon });
     if (node.kind == .directory) {
         try config.setColor(out, .blue);
+    }
+    // Sets executables as green
+    if (node.kind == .file) {
+        if (native_os != .windows and !mem.containsAtLeast(u8, node.name, 1, ".")) {
+            try config.setColor(out, .green);
+        }
+
+        if (native_os == .windows and mem.endsWith(u8, node.name, ".exe")) {
+            try config.setColor(out, .green);
+        }
     }
     try out.print("{s}\n", .{ node.name });
 
