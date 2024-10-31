@@ -10,6 +10,7 @@ const builtin = @import("builtin");
 const native_os = builtin.os.tag;
 const Args = @import("args.zig");
 const TreeNode = @import("TreeNode.zig");
+const Sort = @import("Sort.zig");
 
 const Tree = @This();
 
@@ -39,6 +40,10 @@ pub fn constructTree(self: *Tree) !void {
         // Based on args, skip certain files/directories
         if (!self.args.all) {
             if (mem.startsWith(u8, entry.path, ".")) continue;
+        }
+
+        if (self.args.dir) {
+            if (entry.kind != .directory) continue;
         }
 
         // Split the path into components
@@ -76,11 +81,11 @@ pub fn constructTree(self: *Tree) !void {
         try current_node.children.append(leaf_node);
 
         // Sort the current directory's children
-        std.mem.sort(*TreeNode, current_node.children.items, {}, compareNodes);
+        std.mem.sort(*TreeNode, current_node.children.items, {}, Sort.defaultCompare);
     }
 
     // Sort by files, then directories
-    std.mem.sort(*TreeNode, self.root.children.items, {}, compareNodes);
+    std.mem.sort(*TreeNode, self.root.children.items, {}, Sort.defaultCompare);
 }
 
 pub fn printFull(self: *Tree, positional: []const u8) !void {
@@ -89,9 +94,11 @@ pub fn printFull(self: *Tree, positional: []const u8) !void {
     const out = stdout.writer();
 
     // print the positional
+    try config.setColor(out, .bold);
     try config.setColor(out, .blue);
     try out.print("{s}\n", .{positional});
 
+    try config.setColor(out, .reset);
     try config.setColor(out, .white);
     // Skip the root node's children and print them directly
     for (self.root.children.items, 0..) |child, i| {
@@ -104,11 +111,14 @@ pub fn printTree(node: *TreeNode, prefix: []const u8, is_last: bool) !void {
     const config = tty.detectConfig(stdout);
     const out = stdout.writer();
 
-    // Print the current node
-    const icon = if (node.kind == .directory) "📁" else "📄";
+    // Print the current node, will always be white
+    const icon = node.getIcon();
+    // const icon = if (node.kind == .directory) "📁" else "📄";
     const connector = if (is_last) "└──" else "├──";
     try out.print("{s}{s}{s}", .{ prefix, connector, icon });
+
     if (node.kind == .directory) {
+        try config.setColor(out, .bold);
         try config.setColor(out, .blue);
     }
     // Sets executables as green
@@ -124,6 +134,7 @@ pub fn printTree(node: *TreeNode, prefix: []const u8, is_last: bool) !void {
     try out.print("{s}\n", .{ node.name });
 
     // Reset color always
+    try config.setColor(out, .reset);
     try config.setColor(out, .white);
 
     // Prepare prefix for children
@@ -136,36 +147,4 @@ pub fn printTree(node: *TreeNode, prefix: []const u8, is_last: bool) !void {
     for (node.children.items, 0..) |child, i| {
         try printTree(child, new_prefix.items, i == node.children.items.len - 1);
     }
-}
-
-/// Sorts by files, then directories, alphabetically
-fn compareNodes(context: void, a: *TreeNode, b: *TreeNode) bool {
-    _ = context;
-    // If one is a file and the other is a directory, files come first
-    if (a.kind != b.kind) {
-        return a.kind != .directory;
-    }
-    // If both are the same type (files or directories), sort alphabetically
-    return std.mem.order(u8, a.name, b.name) == .lt;
-}
-
-fn filesThenDirectories(context: void, a: *TreeNode, b: *TreeNode) bool {
-    _ = context;
-    return dirKindToInt(a.kind) < dirKindToInt(b.kind);
-}
-
-fn dirKindToInt(kind: std.fs.Dir.Entry.Kind) u8 {
-    return switch (kind) {
-        .block_device => 0,
-        .character_device => 1,
-        .directory => 2,
-        .door => 3,
-        .event_port => 4,
-        .file => 5,
-        .named_pipe => 6,
-        .sym_link => 7,
-        .unix_domain_socket => 8,
-        .unknown => 9,
-        .whiteout => 10,
-    };
 }

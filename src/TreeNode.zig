@@ -4,6 +4,7 @@ const mem = std.mem;
 const Allocator = mem.Allocator;
 const print = std.debug.print;
 const ArrayList = std.ArrayList;
+const UnicodeIcons = @import("UnicodeIcons.zig");
 
 const TreeNode = @This();
 
@@ -30,4 +31,12 @@ pub fn deinit(self: *TreeNode) void {
     self.children.deinit();
     self.allocator.free(self.name);
     self.allocator.destroy(self);
+}
+
+pub fn getIcon(self: *TreeNode) []const u8 {
+    if (self.kind == .directory) return UnicodeIcons.folder;
+    
+    if (mem.endsWith(u8, self.name, ".zig")) return UnicodeIcons.zig;
+
+    return UnicodeIcons.file;
 }
