@@ -96,12 +96,21 @@ pub fn constructTree(self: *Tree) !void {
         const leaf_node = try TreeNode.init(self.allocator, path_components.items[path_components.items.len - 1], entry.kind);
         try current_node.children.append(leaf_node);
 
-        // Sort the current directory's children
-        std.mem.sort(*TreeNode, current_node.children.items, {}, Sort.defaultCompare);
+        if (self.args.reverse) {
+            std.mem.sort(*TreeNode, current_node.children.items, {}, Sort.defaultCompareReverse);
+        }
+        else {
+            // Sort the current directory's children
+            std.mem.sort(*TreeNode, current_node.children.items, {}, Sort.defaultCompare);
+        }
     }
 
-    // Sort by files, then directories
-    std.mem.sort(*TreeNode, self.root.children.items, {}, Sort.defaultCompare);
+    if (self.args.reverse) {
+        std.mem.sort(*TreeNode, self.root.children.items, {}, Sort.defaultCompareReverse);
+    } else {
+        // Sort by files, then directories
+        std.mem.sort(*TreeNode, self.root.children.items, {}, Sort.defaultCompare);
+    }
 }
 
 pub fn printFull(self: *Tree, positional: []const u8) !void {

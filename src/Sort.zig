@@ -26,6 +26,16 @@ pub fn defaultCompare(context: void, a: *TreeNode, b: *TreeNode) bool {
     return std.mem.order(u8, a.name, b.name) == .lt;
 }
 
+pub fn defaultCompareReverse(context: void, a: *TreeNode, b: *TreeNode) bool {
+    _ = context;
+    // If one is a file and the other is a directory, files come first
+    if (a.kind != b.kind) {
+        return a.kind == .directory;
+    }
+    // If both are the same type (files or directories), sort alphabetically
+    return std.mem.order(u8, a.name, b.name) == .gt;
+}
+
 fn filesThenDirectories(context: void, a: *TreeNode, b: *TreeNode) bool {
     _ = context;
     return dirKindToInt(a.kind) < dirKindToInt(b.kind);

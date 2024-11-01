@@ -8,17 +8,19 @@ const clap = @import("clap");
 const Args = @This(); 
 
 allocator: Allocator,
-/// Display help
+/// Display help.
 help: bool = false,
-/// List all files
+/// List all files.
 all: bool = false,
-/// List directories only
+/// List directories only.
 dir: bool = false,
 /// Print the full path prefix for each file.
 full: bool = false,
 /// Descend only level directories deep
 level: usize = 1,
-/// Directories given
+/// Reverse the order of the sort.
+reverse: bool = false,
+/// Directories given.
 positionals: ArrayList([]const u8),
 
 pub fn parse_args(allocator: Allocator) !Args {
@@ -29,6 +31,7 @@ pub fn parse_args(allocator: Allocator) !Args {
         \\-d, --dir                 List directories only.
         \\-f, --full                Print the full path prefix for each file.
         \\-L, --level <USIZE>       Descend only level directories deep.
+        \\-r, --reverse             Reverse the order of the sort.
         \\<DIR>...
         \\
     );
@@ -74,6 +77,7 @@ pub fn parse_args(allocator: Allocator) !Args {
         .dir = res.args.dir != 0,
         .full = res.args.full != 0,
         .level = level,
+        .reverse = res.args.reverse != 0,
         .positionals = positionals,
     };
 }
