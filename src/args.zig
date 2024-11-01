@@ -82,6 +82,13 @@ pub fn parse_args(allocator: Allocator) !Args {
     };
 }
 
+pub fn init_empty(allocator: Allocator) Args {
+    return .{
+        .allocator = allocator,
+        .positionals = ArrayList([]const u8).init(allocator),
+    };
+}
+
 pub fn deinit(self: *Args) void {
     for (self.positionals.items) |item| {
         self.allocator.free(item);

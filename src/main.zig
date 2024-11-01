@@ -36,6 +36,8 @@ pub fn main() !void {
         try tree.constructTree();
 
         try tree.printFull(sub_path);
+
+        try tree.writeToStdout();
     }
     // Do each dir passed
     else {
@@ -43,12 +45,18 @@ pub fn main() !void {
             var current_dir = try fs.cwd().openDir(sub_path, .{ .iterate = true });
             defer current_dir.close();
 
-            var tree = try Tree.init(allocator, current_dir, ".", args);
+            var tree = try Tree.init(allocator, current_dir, sub_path, args);
             defer tree.deinit();
 
             try tree.constructTree();
 
             try tree.printFull(sub_path);
+
+            try tree.writeToStdout();
         }
     }
+}
+
+test {
+    _ = @import("Tree.zig");
 }
