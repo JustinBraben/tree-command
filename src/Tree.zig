@@ -90,13 +90,9 @@ pub fn constructTree(self: *Tree) !void {
             }
         }
 
-        // TODO: Implement full paths for each TreeNode
+        // TODO: Implement full paths for each TreeNode `-f`
         if (self.args.full) {
-            // try path_components.append("./");
-            // const new_name = "./" ++ current_node.name;
-            // self.allocator.free(current_node.name);
-            // const new_name = self.allocator.dupe(u8, "./" ++ current_node.name);
-            // std.mem.copyForwards(u8, current_node.name, new_name);
+
         }
 
         // Add the final component
