@@ -19,9 +19,6 @@ allocator: Allocator,
 args: Args,
 walker: fs.Dir.Walker,
 root: *TreeNode,
-stdout: std.fs.File,
-config: tty.Config,
-out: std.fs.File.Writer,
 lines: ArrayList([]const u8),
 
 pub fn init(allocator: Allocator, dir: fs.Dir, base_path: []const u8, args: Args) !Tree {
@@ -30,9 +27,6 @@ pub fn init(allocator: Allocator, dir: fs.Dir, base_path: []const u8, args: Args
         .args = args,
         .walker = try dir.walk(allocator),
         .root = try TreeNode.init(allocator, base_path, .directory),
-        .stdout = std.io.getStdOut(),
-        .config = tty.detectConfig(std.io.getStdOut()),
-        .out = std.io.getStdOut().writer(),
         .lines = ArrayList([]const u8).init(allocator),
     };
 }
