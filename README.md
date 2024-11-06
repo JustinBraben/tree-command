@@ -82,10 +82,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## TODO
 
 - [x] Display tree view
-- [x] Display unicode characters
-- [x] Display directories only `-d`
 - [x] Display all files `-a`
+- [x] Display directories only `-d`
 - [x] Display in reverse `-r`
+- [x] Display optional unicode characters `--unicode`
 - [x] Display positionals sequentially `<DIR>...`
 - [ ] Display with full path name `-f`
 - [ ] Display with max Depth `-L <USIZE>`

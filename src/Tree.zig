@@ -149,7 +149,7 @@ pub fn printTree(self: *Tree, node: *TreeNode, prefix: []const u8, is_last: bool
     var line = ArrayList(u8).init(self.allocator);
     defer line.deinit();
 
-    const icon = node.getIcon();
+    const icon = if (self.args.unicode) node.getIcon() else " ";
     const connector = if (is_last) "└──" else "├──";
     
     try line.appendSlice(prefix);

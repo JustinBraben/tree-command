@@ -20,6 +20,8 @@ full: bool = false,
 level: usize = 1,
 /// Reverse the order of the sort.
 reverse: bool = false,
+/// Print pretty unicode icons.
+unicode: bool = false,
 /// Directories given.
 positionals: ArrayList([]const u8),
 
@@ -32,6 +34,7 @@ pub fn parse_args(allocator: Allocator) !Args {
         \\-f, --full                Print the full path prefix for each file.
         \\-L, --level <USIZE>       Descend only level directories deep.
         \\-r, --reverse             Reverse the order of the sort.
+        \\--unicode                 Print pretty unicode icons.
         \\<DIR>...
         \\
     );
@@ -78,6 +81,7 @@ pub fn parse_args(allocator: Allocator) !Args {
         .full = res.args.full != 0,
         .level = level,
         .reverse = res.args.reverse != 0,
+        .unicode = res.args.unicode != 0,
         .positionals = positionals,
     };
 }
